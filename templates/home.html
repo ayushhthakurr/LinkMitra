@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LinkMitra - URL Shortener</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <style>
+      :root {
+        --primary-color: #4a90e2;
+        --secondary-color: #2c3e50;
+        --accent-color: #3498db;
+        --background-color: #f5f7fa;
+        --card-color: #ffffff;
+      }
+      body {
+        background-color: var(--background-color);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .card {
+        background-color: var(--card-color);
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+      }
+      .card:hover {
+        transform: translateY(-5px);
+      }
+      .btn-primary {
+        background-color: var(--primary-color);
+        border: none;
+        padding: 10px 25px;
+        font-weight: 600;
+      }
+      .btn-primary:hover {
+        background-color: var(--accent-color);
+      }
+      .form-control {
+        border: 2px solid #e0e0e0;
+        padding: 12px;
+        border-radius: 8px;
+      }
+      .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+      }
+      h2 {
+        color: var(--secondary-color);
+        font-weight: 700;
+        margin-bottom: 30px;
+      }
+      footer {
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 15px 0;
+        margin-top: auto;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="container" style="width:95%;">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+          <div class="card" style="border-radius: 15px;">
+            <div class="card-body p-5">
+              <h2 class="text-center mb-5">LinkMitra</h2>
+              <p class="text-center text-muted mb-4">Shorten your links with ease</p>
+
+              <form id="myForm" method="POST">
+                {% csrf_token %} 
+                {% for hidden_field in form.hidden_fields %} 
+                  {{ hidden_field.errors }} 
+                  {{ hidden_field }} 
+                {% endfor %}
+                {% for field in form.visible_fields %}
+                  <div class="form-outline mb-4">
+                    <input
+                      placeholder="Enter your URL here"
+                      name="{{ field.name }}"
+                      id="{{ field.id_for_label }}"
+                      type="{{ field.widget_type }}"
+                      class="form-control form-control-lg"
+                    />
+                    {% if field.errors %} 
+                      {% for error in field.errors %}
+                        <p class="text-danger italic pb-2">{{ error }}</p>
+                      {% endfor %} 
+                    {% endif %}
+                  </div>
+                {% endfor %}
+
+                <div class="d-flex justify-content-center">
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-lg">
+                    Shorten URL
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="mt-4">
+      <div class="text-center">
+        ©{% now "Y" %} All Rights Reserved By <strong>Ayush Thakur</strong>
+      </div>
+    </footer>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+
+    <script>
+      const linkFromBackend = "{{ link }}";
+      // console.log(linkFromBackend);
+      if (linkFromBackend && linkFromBackend !== "Give Valid Url") {
+        Swal.fire({
+          icon: "success",
+          title: "Shortened URL:",
+          html: `
+                <a href='${linkFromBackend}' target='_blank'>${linkFromBackend}</a>
+                <button id="copyButton" class="btn btn-primary">Copy</button>
+            `,
+          confirmButtonText: "Cancel",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = "/";
+          }
+        });
+
+        // Set up clipboard functionality
+        const copyButton = document.getElementById("copyButton");
+        const clipboard = new ClipboardJS(copyButton, {
+          text: function () {
+            return linkFromBackend;
+          },
+        });
+      } else if (linkFromBackend && linkFromBackend === "Give Valid Url") {
+        Swal.fire({
+          icon: "warning",
+          title: `
+            <p>${linkFromBackend}</p>
+            `,
+          confirmButtonText: "Cancel",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = "/";
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
